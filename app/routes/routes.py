@@ -1,5 +1,22 @@
 from flask import Blueprint, jsonify, abort, make_response
 
+class Dog:
+    def __init__(self, id, name, color, personality):
+        self.id = id
+        self.name = name
+        self.color = color
+        self.personality = personality
+
+    def to_dog_dict(self):
+        return dict(
+            id=self.id, 
+            name=self.name, 
+            color=self.color,
+            personality=self.personality
+                    )
+
+
+
 class Cat:
     def __init__(self, id, name, color, personality):
         self.id = id
@@ -21,9 +38,21 @@ cats = [
     Cat(3, "Big Ears", "grey and white", "sleepy")
 ]
 
-bp = Blueprint("cats", __name__, url_prefix="/cats")
+dogs = [
+    Dog(1, "Amigo", "brown", "playful"), 
+    Dog(2, "Vigo", "black", "shy"),
+]
 
-@bp.route("", methods=["GET"])
+bp_cats = Blueprint("cats", __name__, url_prefix="/cats")
+bp_dogs = Blueprint("dogs", __name__, url_prefix="/dogs")
+
+@bp_dogs.route("", methods=["GET"])
+def handle_dogs():
+    results_list = [dog.to_dog_dict() for dog in dogs]
+    return jsonify(results_list)
+
+
+@bp_cats.route("", methods=["GET"])
 def handle_cats():
     results_list = []
     for cat in cats: 
@@ -42,7 +71,7 @@ def validate_cat(cat_id):
 
     abort(make_response({"message":f"cat {cat_id} not found"}, 404))
 
-@bp.route("/<id>", methods=["GET"])
+@bp_cats.route("/<id>", methods=["GET"])
 def handle_cat(id):
     cat = validate_cat(id)
     return jsonify(cat.to_cat_dict())
